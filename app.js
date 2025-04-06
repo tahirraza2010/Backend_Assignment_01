@@ -108,6 +108,10 @@ app.delete("/tasks", async (req, res) => {
   }
 });
 
+app.get('/',(req,res)=>{
+  res.send('Welcome to todo app')
+})
+
 // Start Server
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
