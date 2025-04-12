@@ -1,118 +1,90 @@
 import express from "express";
 import mongoose from "mongoose";
+import cors from "cors";
 import taskModel from "./models/TaskSchema.js";
 
 const app = express();
 const PORT = 5000;
 
-// MongoDB Connection URI
-const DB_URI =
-  "mongodb+srv://tahirrazagb2010:tahir2010@cluster0.zjbgcyq.mongodb.net/";
-
-// Connect MongoDB
-mongoose.connect(DB_URI);
-mongoose.connection.on("connected", () => {
-  console.log("MongoDB connected successfully..");
-});
-mongoose.connection.on("error", (err) => {
-  console.log("MongoDB connection error:", err);
-});
+// Connect to MongoDB Atlas with database name
+mongoose
+  .connect("mongodb+srv://tahirrazagb2010:tahir2010@cluster0.zjbgcyq.mongodb.net/todoDB")
+  .then(() => console.log("✅ MongoDB connected"))
+  .catch((err) => console.log("❌ MongoDB connection error:", err));
 
 // Middleware
+app.use(cors());
 app.use(express.json());
 
-// ✅ Get All Tasks
+// Routes
+
+// 🟢 Get All Tasks
 app.get("/tasks", async (req, res) => {
   try {
-    const tasks = await taskModel.find({});
-    res.status(200).json({ message: "Tasks fetched successfully", tasks });
-  } catch (error) {
-    console.log(error);
-    res.status(500).json({ message: "Internal server error" });
+    const tasks = await taskModel.find();
+    res.status(200).json({ tasks });
+  } catch (err) {
+    res.status(500).json({ message: "Error fetching tasks" });
   }
 });
 
-// ✅ Create Task
+// 🟢 Create Task
 app.post("/tasks", async (req, res) => {
+  const { text } = req.body;
+  if (!text?.trim()) return res.status(400).json({ message: "Task text is required" });
+
   try {
-    const { text } = req.body;
-
-    if (!text || !text.trim()) {
-      return res.status(400).json({ message: "Task text is required" });
-    }
-
     const newTask = await taskModel.create({ text });
-    res.status(201).json({ message: "Task created successfully", newTask });
-  } catch (error) {
-    console.log(error);
-    res.status(500).json({ message: "Internal server error" });
+    res.status(201).json({ newTask });
+  } catch (err) {
+    res.status(500).json({ message: "Error creating task" });
   }
 });
 
-// ✅ Update Task
+// 🟢 Update Task
 app.put("/tasks", async (req, res) => {
+  const { taskId, text } = req.body;
+  if (!taskId || !text?.trim()) {
+    return res.status(400).json({ message: "Task ID and text are required" });
+  }
+
   try {
-    const { taskId, text } = req.body;
-
-    if (!taskId) {
-      return res.status(400).json({ message: "Task ID is required" });
-    }
-
-    if (!text || !text.trim()) {
-      return res.status(400).json({ message: "Task text is required" });
-    }
-
     const updatedTask = await taskModel.findByIdAndUpdate(
       taskId,
       { text },
       { new: true }
     );
+    if (!updatedTask) return res.status(404).json({ message: "Task not found" });
 
-    if (!updatedTask) {
-      return res.status(404).json({ message: "Task not found" });
-    }
-
-    res.status(200).json({ message: "Task updated successfully", updatedTask });
-  } catch (error) {
-    console.log(error);
-    res.status(500).json({ message: "Internal server error" });
+    res.status(200).json({ updatedTask });
+  } catch (err) {
+    res.status(500).json({ message: "Error updating task" });
   }
 });
 
-// ✅ Delete Task
+// 🟢 Delete One Task
 app.delete("/tasks/:id", async (req, res) => {
   try {
-    const { id } = req.params;
+    const deleted = await taskModel.findByIdAndDelete(req.params.id);
+    if (!deleted) return res.status(404).json({ message: "Task not found" });
 
-    const deletedTask = await taskModel.findByIdAndDelete(id);
-
-    if (!deletedTask) {
-      return res.status(404).json({ message: "Task not found" });
-    }
-
-    res.status(200).json({ message: "Task deleted successfully" });
-  } catch (error) {
-    console.log(error);
-    res.status(500).json({ message: "Internal server error" });
+    res.status(200).json({ message: "Task deleted" });
+  } catch (err) {
+    res.status(500).json({ message: "Error deleting task" });
   }
 });
 
-// ✅ Delete All Tasks
+// 🟢 Delete All Tasks
 app.delete("/tasks", async (req, res) => {
   try {
     await taskModel.deleteMany({});
-    res.status(200).json({ message: "All tasks deleted successfully" });
-  } catch (error) {
-    console.log(error);
-    res.status(500).json({ message: "Internal server error" });
+    res.status(200).json({ message: "All tasks deleted" });
+  } catch (err) {
+    res.status(500).json({ message: "Error deleting all tasks" });
   }
 });
 
-app.get('/',(req,res)=>{
-  res.send('Welcome to todo app')
-})
-
 // Start Server
 app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
+  console.log(`🚀 Server running at http://localhost:${PORT}`);
 });
