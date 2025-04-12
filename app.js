@@ -9,8 +9,8 @@ const PORT = 5000;
 // Connect to MongoDB Atlas with database name
 mongoose
   .connect("mongodb+srv://tahirrazagb2010:tahir2010@cluster0.zjbgcyq.mongodb.net/todoDB")
-  .then(() => console.log("✅ MongoDB connected"))
-  .catch((err) => console.log("❌ MongoDB connection error:", err));
+  .then(() => console.log(" MongoDB connected"))
+  .catch((err) => console.log(" MongoDB connection error:", err));
 
 // Middleware
 app.use(cors());
@@ -18,7 +18,7 @@ app.use(express.json());
 
 // Routes
 
-// 🟢 Get All Tasks
+//  Get All Tasks
 app.get("/tasks", async (req, res) => {
   try {
     const tasks = await taskModel.find();
@@ -28,7 +28,7 @@ app.get("/tasks", async (req, res) => {
   }
 });
 
-// 🟢 Create Task
+//  Create Task
 app.post("/tasks", async (req, res) => {
   const { text } = req.body;
   if (!text?.trim()) return res.status(400).json({ message: "Task text is required" });
@@ -41,7 +41,7 @@ app.post("/tasks", async (req, res) => {
   }
 });
 
-// 🟢 Update Task
+//  Update Task
 app.put("/tasks", async (req, res) => {
   const { taskId, text } = req.body;
   if (!taskId || !text?.trim()) {
@@ -62,7 +62,7 @@ app.put("/tasks", async (req, res) => {
   }
 });
 
-// 🟢 Delete One Task
+//  Delete One Task
 app.delete("/tasks/:id", async (req, res) => {
   try {
     const deleted = await taskModel.findByIdAndDelete(req.params.id);
@@ -74,7 +74,7 @@ app.delete("/tasks/:id", async (req, res) => {
   }
 });
 
-// 🟢 Delete All Tasks
+//  Delete All Tasks
 app.delete("/tasks", async (req, res) => {
   try {
     await taskModel.deleteMany({});
@@ -86,5 +86,5 @@ app.delete("/tasks", async (req, res) => {
 
 // Start Server
 app.listen(PORT, () => {
-  console.log(`🚀 Server running at http://localhost:${PORT}`);
+  console.log(` Server running at http://localhost:${PORT}`);
 });
